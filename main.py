@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 DEFAULT_CONSTANTS = {
     "population_size": 2000,
     "initial_infected": 50,
-    "vaccination_rate": 0.05,
+    "vaccination_rate": 0.0075,
     "vaccination_delay": 14,
     "delay_between_doses": 21,
     "vaccine_efficacy_per_dose": [0.6, 0.3],
@@ -19,10 +19,10 @@ DEFAULT_CONSTANTS = {
     "mortality_rate": 0.03,
     "contact_rate_lambda": 20,
     "masking_effectiveness": 0.4,
-    "vaccination_start_step": 50,
+    "vaccination_start_step": 30,
     "total_steps": 200,
-    "infection_radius": 0.05,
-    "base_infection_prob": 0.1,
+    "infection_radius": 0.075,
+    "base_infection_prob": 0.4,
 }
 
 # States

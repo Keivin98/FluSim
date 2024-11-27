@@ -56,8 +56,9 @@ python main.py
 ```
 
 Results include:
-• SEIRV plots saved as PNG files.
-• Final reports for each scenario.
+
+- SEIRV plots saved as PNG files.
+- Final reports for each scenario.
 
 Customizing Simulations
 
@@ -110,25 +111,28 @@ Reports
 Each scenario generates a report summarizing:
 
 Final Counts:
-• Susceptible (S)
-• Exposed (E)
-• Infectious (I)
-• Recovered (R)
-• Deceased (D)
-• Vaccinated (V)
+
+- Susceptible (S)
+- Exposed (E)
+- Infectious (I)
+- Recovered (R)
+- Deceased (D)
+- Vaccinated (V)
 
 Aggregate Data:
-• Total Infected
-• Total Deceased
-• Total Recovered
-• Total Vaccinated
+
+- Total Infected
+- Total Deceased
+- Total Recovered
+- Total Vaccinated
 
 Plots
 
 SEIRV dynamics are visualized with:
-• Customizable y-axis ticks: Based on powers of 2 (e.g., 5, 10, 20, 40, …).
-• Confidence Intervals: Shaded regions show ±1 standard deviation.
-• Logarithmic Scaling: Makes trends across different orders of magnitude more readable.
+
+- Customizable y-axis ticks: Based on powers of 2 (e.g., 5, 10, 20, 40, …).
+- Confidence Intervals: Shaded regions show ±1 standard deviation.
+- Logarithmic Scaling: Makes trends across different orders of magnitude more readable.
 
 Plots are saved automatically as PNG files.
 
