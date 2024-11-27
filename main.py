@@ -1,28 +1,28 @@
 import numpy as np
 import random
-from scipy.stats import poisson, norm, bernoulli, beta
+from scipy.stats import poisson, norm, bernoulli
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 # Constants (can be overridden in functions)
 DEFAULT_CONSTANTS = {
-    "population_size": 2000,  # Reduced population for quicker demonstration
+    "population_size": 2000,
     "initial_infected": 50,
-    "vaccination_rate": 0.005,  # Default vaccination rate
+    "vaccination_rate": 0.02,  # Increased vaccination rate
     "vaccination_delay": 14,
     "delay_between_doses": 21,
-    "vaccine_efficacy_per_dose": [0.6, 0.3],  # Efficacy after each dose
+    "vaccine_efficacy_per_dose": [0.6, 0.3],
     "recovery_mean": 10,
     "recovery_sd": 2,
     "latent_period_mean": 2,
     "latent_period_sd": 1,
     "mortality_rate": 0.03,
-    "contact_rate_lambda": 20,  # Reduced contact rate
-    "masking_effectiveness": 0.4,  # Default masking effectiveness
-    "vaccination_start_step": 50,
-    "total_steps": 200,        # Adjusted total steps
-    "infection_radius": 0.075,  # Adjusted infection radius
-    "base_infection_prob": 0.85,  # Reduced base infection probability
+    "contact_rate_lambda": 20,
+    "masking_effectiveness": 0.4,
+    "vaccination_start_step": 10,  # Start vaccination earlier
+    "total_steps": 200,
+    "infection_radius": 0.075,
+    "base_infection_prob": 0.1,  # Reduced base infection probability
 }
 
 # States
@@ -36,35 +36,28 @@ class Person:
     def __init__(self, x, y, params):
         self.x = x
         self.y = y
-        self.state = SUSCEPTIBLE  # 'S', 'E', 'I', 'R', 'D'
+        self.state = SUSCEPTIBLE
         self.vaccinated = False
         self.doses_received = 0
-        self.vaccination_times = []  # Times when doses were received
-        self.vaccine_efficacy = 0.0  # Total efficacy
+        self.vaccination_times = []
+        self.vaccine_efficacy = 0.0
         self.infected_time = 0
         self.latent_period = max(1, int(norm.rvs(params["latent_period_mean"], params["latent_period_sd"])))
         self.recovery_time = self.latent_period + max(1, int(norm.rvs(params["recovery_mean"], params["recovery_sd"])))
         self.was_infected = False
-        self.recovered_step = None  # To track immunity duration if needed
+        self.recovered_step = None
 
     def update_vaccination_status(self, current_step, params):
-        # Check for each dose if the vaccination delay has passed
         for idx, dose_time in enumerate(self.vaccination_times):
             if current_step - dose_time == params["vaccination_delay"] and idx >= self.doses_received:
                 self.doses_received += 1
                 if idx < len(params["vaccine_efficacy_per_dose"]):
                     dose_efficacy = params["vaccine_efficacy_per_dose"][idx]
                 else:
-                    dose_efficacy = 0.0  # No efficacy if doses exceed defined efficacies
+                    dose_efficacy = 0.0
                 self.vaccine_efficacy += dose_efficacy
                 self.vaccine_efficacy = min(self.vaccine_efficacy, 1.0)
                 self.vaccinated = True
-                # Optionally, handle second dose differently if needed
-
-    def get_infection_probability(self, params):
-        # Adjust infection probability based on vaccine efficacy
-        adjusted_prob = params["base_infection_prob"] * (1 - self.vaccine_efficacy)
-        return adjusted_prob
 
 def vaccinate_population(step, population, params, doses, delay_between_doses):
     num_to_vaccinate = int(params["vaccination_rate"] * params["population_size"])
@@ -78,21 +71,8 @@ def vaccinate_population(step, population, params, doses, delay_between_doses):
         for person in to_vaccinate:
             person.vaccination_times.append(step)
 
-def categorize_positions(population):
-    positions = {
-        SUSCEPTIBLE: [],
-        EXPOSED: [],
-        INFECTIOUS: [],
-        RECOVERED: [],
-        DEAD: [],
-    }
-    for person in population:
-        positions[person.state].append((person.x, person.y))
-    return positions
-
 def run_simulation(params=DEFAULT_CONSTANTS, vaccination_rate=None, masking_effectiveness=None,
                    infection_radius=None, doses=1, delay_between_doses=0, collect_data=True):
-    # Allow overriding specific constants
     params = {**DEFAULT_CONSTANTS, **params}
     if vaccination_rate is not None:
         params["vaccination_rate"] = vaccination_rate
@@ -105,7 +85,7 @@ def run_simulation(params=DEFAULT_CONSTANTS, vaccination_rate=None, masking_effe
     population = [Person(np.random.random(), np.random.random(), params) for _ in range(params["population_size"])]
     for i in range(params["initial_infected"]):
         person = population[i]
-        person.state = EXPOSED  # Start in Exposed state
+        person.state = EXPOSED
         person.was_infected = True
 
     if collect_data:
@@ -129,8 +109,10 @@ def run_simulation(params=DEFAULT_CONSTANTS, vaccination_rate=None, masking_effe
                 if other_person.state == SUSCEPTIBLE:
                     distance = np.sqrt((person.x - other_person.x) ** 2 + (person.y - other_person.y) ** 2)
                     if distance < params["infection_radius"]:
-                        infection_prob = person.get_infection_probability(params)
-                        infection_prob *= (1 - params["masking_effectiveness"])
+                        base_prob = params["base_infection_prob"]
+                        vaccine_efficacy_susceptible = other_person.vaccine_efficacy
+                        masking_effectiveness = params["masking_effectiveness"]
+                        infection_prob = base_prob * (1 - vaccine_efficacy_susceptible) * (1 - masking_effectiveness)
                         if random.random() < infection_prob:
                             other_person.state = EXPOSED
                             other_person.infected_time = 0
@@ -142,7 +124,7 @@ def run_simulation(params=DEFAULT_CONSTANTS, vaccination_rate=None, masking_effe
                 person.infected_time += 1
                 if person.infected_time >= person.latent_period:
                     person.state = INFECTIOUS
-                    person.infected_time = 0  # Reset for infectious period
+                    person.infected_time = 0
             elif person.state == INFECTIOUS:
                 person.infected_time += 1
                 if person.infected_time >= (person.recovery_time - person.latent_period):
@@ -150,7 +132,7 @@ def run_simulation(params=DEFAULT_CONSTANTS, vaccination_rate=None, masking_effe
                         person.state = DEAD
                     else:
                         person.state = RECOVERED
-                        person.recovered_step = step  # Track when recovered
+                        person.recovered_step = step
 
         # Collect per-state counts
         if collect_data:
@@ -160,7 +142,7 @@ def run_simulation(params=DEFAULT_CONSTANTS, vaccination_rate=None, masking_effe
                 INFECTIOUS: 0,
                 RECOVERED: 0,
                 DEAD: 0,
-                'V': 0  # Vaccinated count
+                'V': 0
             }
             for person in population:
                 counts[person.state] += 1
@@ -231,10 +213,12 @@ def plot_seirv_curves(per_state_counts_mean, per_state_counts_std, scenario_name
     plt.xlabel('Time (days)')
     plt.ylabel('Number of People')
     plt.title(f'SEIRV Model Simulation - {scenario_name}')
+    plt.yscale('log')  # Apply logarithmic scale
+    plt.grid(True, which="both", ls="--", linewidth=0.5)
     plt.legend()
     if save:
-        plt.savefig(f'seirv_simulation_{scenario_name}.png')
-    else: 
+        plt.savefig(f'plots/seirv_simulation_{scenario_name}.png')
+    else:
         plt.show()
     plt.close()
 
@@ -255,24 +239,24 @@ scenarios = {
     "No Masking": {
         "masking_effectiveness": 0.0,
         "vaccination_rate": 0.0,
-        "doses": 0,  # No vaccination
+        "doses": 0,
         "delay_between_doses": 0,
     },
     "Masking and Social Distancing": {
         "masking_effectiveness": 0.4,
         "vaccination_rate": 0.0,
-        "doses": 0,  # No vaccination
+        "doses": 0,
         "delay_between_doses": 0,
     },
     "1 Vaccine Dose": {
         "masking_effectiveness": 0.0,
-        "vaccination_rate": 0.005,
+        "vaccination_rate": 0.02,  # Increased vaccination rate
         "doses": 1,
-        "delay_between_doses": 0,  # Not applicable for 1 dose
+        "delay_between_doses": 0,
     },
     "2 Vaccine Doses": {
         "masking_effectiveness": 0.4,
-        "vaccination_rate": 0.005,
+        "vaccination_rate": 0.02,  # Increased vaccination rate
         "doses": 2,
         "delay_between_doses": 21,
     },
@@ -289,7 +273,7 @@ if __name__ == "__main__":
         params = {
             "population_size": 2000,
             "total_steps": 200,
-            "vaccination_start_step": 50,
+            "vaccination_start_step": 10,  # Start vaccination earlier
             "vaccine_efficacy_per_dose": [0.6, 0.3],
             "vaccination_delay": 14,
             "delay_between_doses": scenario_params["delay_between_doses"],
@@ -297,7 +281,7 @@ if __name__ == "__main__":
             "recovery_mean": 10,
             "masking_effectiveness": scenario_params["masking_effectiveness"],
             "infection_radius": 0.075,
-            "base_infection_prob": 0.85,
+            "base_infection_prob": 0.1,  # Reduced base infection probability
         }
 
         # Run Monte Carlo simulation for the current scenario
