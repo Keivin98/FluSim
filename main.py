@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 DEFAULT_CONSTANTS = {
     "population_size": 2000,
     "initial_infected": 50,
-    "vaccination_rate": 0.02,  # Increased vaccination rate
+    "vaccination_rate": 0.05,
     "vaccination_delay": 14,
     "delay_between_doses": 21,
     "vaccine_efficacy_per_dose": [0.6, 0.3],
@@ -19,10 +19,10 @@ DEFAULT_CONSTANTS = {
     "mortality_rate": 0.03,
     "contact_rate_lambda": 20,
     "masking_effectiveness": 0.4,
-    "vaccination_start_step": 10,  # Start vaccination earlier
+    "vaccination_start_step": 50,
     "total_steps": 200,
-    "infection_radius": 0.075,
-    "base_infection_prob": 0.1,  # Reduced base infection probability
+    "infection_radius": 0.05,
+    "base_infection_prob": 0.1,
 }
 
 # States
@@ -213,7 +213,7 @@ def plot_seirv_curves(per_state_counts_mean, per_state_counts_std, scenario_name
     plt.xlabel('Time (days)')
     plt.ylabel('Number of People')
     plt.title(f'SEIRV Model Simulation - {scenario_name}')
-    plt.yscale('log')  # Apply logarithmic scale
+    # plt.yscale('log')  # Apply logarithmic scale
     plt.grid(True, which="both", ls="--", linewidth=0.5)
     plt.legend()
     if save:
@@ -249,16 +249,16 @@ scenarios = {
         "delay_between_doses": 0,
     },
     "1 Vaccine Dose": {
-        "masking_effectiveness": 0.0,
-        "vaccination_rate": 0.02,  # Increased vaccination rate
+        "masking_effectiveness": 0.4,
+        "vaccination_rate": 0.0075,  # Increased vaccination rate
         "doses": 1,
         "delay_between_doses": 0,
     },
     "2 Vaccine Doses": {
         "masking_effectiveness": 0.4,
-        "vaccination_rate": 0.02,  # Increased vaccination rate
+        "vaccination_rate": 0.0075,  # Increased vaccination rate
         "doses": 2,
-        "delay_between_doses": 21,
+        "delay_between_doses": 14,
     },
 }
 
@@ -273,15 +273,15 @@ if __name__ == "__main__":
         params = {
             "population_size": 2000,
             "total_steps": 200,
-            "vaccination_start_step": 10,  # Start vaccination earlier
+            "vaccination_start_step": 20,
             "vaccine_efficacy_per_dose": [0.6, 0.3],
             "vaccination_delay": 14,
             "delay_between_doses": scenario_params["delay_between_doses"],
-            "contact_rate_lambda": 20,
+            "contact_rate_lambda": 15,
             "recovery_mean": 10,
             "masking_effectiveness": scenario_params["masking_effectiveness"],
-            "infection_radius": 0.075,
-            "base_infection_prob": 0.1,  # Reduced base infection probability
+            "infection_radius": 0.1,
+            "base_infection_prob": 0.4,
         }
 
         # Run Monte Carlo simulation for the current scenario
