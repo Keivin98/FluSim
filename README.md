@@ -142,7 +142,7 @@ Key Parameters
 | --------------------------- | ---------------------------------------------------------------------- | ------------- |
 | `population_size`           | Total number of people in the simulation.                              | 2000          |
 | `initial_infected`          | Number of initially infected individuals.                              | 50            |
-| `vaccination_rate`          | Daily proportion of the population vaccinated.                         | 0.02          |
+| `vaccination_rate`          | Daily proportion of the population vaccinated.                         | 0.0075        |
 | `vaccination_delay`         | Days before vaccine-induced immunity becomes effective.                | 14            |
 | `delay_between_doses`       | Minimum time between vaccine doses.                                    | 21            |
 | `vaccine_efficacy_per_dose` | Efficacy of each vaccine dose.                                         | [0.6, 0.3]    |
@@ -153,7 +153,7 @@ Key Parameters
 | `mortality_rate`            | Probability of death for an infected individual.                       | 0.03          |
 | `contact_rate_lambda`       | Average number of daily contacts per person.                           | 20            |
 | `masking_effectiveness`     | Proportionate reduction in transmission probability due to masking.    | 0.4           |
-| `vaccination_start_step`    | Simulation step when vaccination begins.                               | 10            |
+| `vaccination_start_step`    | Simulation step when vaccination begins.                               | 30            |
 | `total_steps`               | Total number of days in the simulation.                                | 200           |
 | `infection_radius`          | Distance within which an infectious individual can spread the disease. | 0.075         |
-| `base_infection_prob`       | Probability of transmission per contact (before adjustments).          | 0.3           |
+| `base_infection_prob`       | Probability of transmission per contact (before adjustments).          | 0.4           |
