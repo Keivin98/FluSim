@@ -14,6 +14,20 @@ This library provides a framework to simulate the spread of infectious diseases 
 
 ---
 
+# Simulation Results
+
+Below is a grid showing the SEIRV simulation results for the predefined scenarios.
+
+| **Baseline**                                           | **Masking and Social Distancing**                                                                |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| ![No Masking](plots/seirv_simulation_No%20Masking.png) | ![Masking and Social Distancing](plots/seirv_simulation_Masking%20and%20Social%20Distancing.png) |
+
+| **1 Vaccine Dose**                                               | **2 Vaccine Doses**                                                |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------ |
+| ![1 Vaccine Dose](plots/seirv_simulation_1%20Vaccine%20Dose.png) | ![2 Vaccine Doses](plots/seirv_simulation_2%20Vaccine%20Doses.png) |
+
+---
+
 ## Installation
 
 Clone the repository or copy the `main.py` file into your project.
