@@ -271,30 +271,30 @@ if __name__ == "__main__":
     runs = 50  # Number of simulation runs for Monte Carlo
     
     scenarios = {
-        # "No Masking": {
-        #     "masking_effectiveness": 0.0,
-        #     "vaccination_rate": 0.0,
-        #     "doses": 0,
-        #     "delay_between_doses": 0,
-        # },
+        "No Masking": {
+            "masking_effectiveness": 0.0,
+            "vaccination_rate": 0.0,
+            "doses": 0,
+            "delay_between_doses": 0,
+        },
         "Masking & Distancing": {
             "masking_effectiveness": 0.45,
             "vaccination_rate": 0.0,
             "doses": 0,
             "delay_between_doses": 0,
         },
-        # "1 Vaccine Dose": {
-        #     "masking_effectiveness": 0.45,
-        #     "vaccination_rate": 0.02,
-        #     "doses": 1,
-        #     "delay_between_doses": 7,
-        # },
-        # "2 Vaccine Doses": {
-        #     "masking_effectiveness": 0.45,
-        #     "vaccination_rate": 0.02,
-        #     "doses": 2,
-        #     "delay_between_doses": 7,
-        # },
+        "1 Vaccine Dose": {
+            "masking_effectiveness": 0.45,
+            "vaccination_rate": 0.02,
+            "doses": 1,
+            "delay_between_doses": 7,
+        },
+        "2 Vaccine Doses": {
+            "masking_effectiveness": 0.45,
+            "vaccination_rate": 0.02,
+            "doses": 2,
+            "delay_between_doses": 7,
+        },
     }
     results = {}
     for scenario_name, scenario_params in scenarios.items():
