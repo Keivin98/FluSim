@@ -227,15 +227,15 @@ def plot_seirv_curves(per_state_counts_mean, per_state_counts_std, scenario_name
         plt.plot(time, mean, label=state, linewidth=2)
         plt.fill_between(time, mean - std, mean + std, alpha=0.2)
     
-    plt.xlabel('Time (days)', fontsize=16)
-    plt.ylabel('Number of People', fontsize=16)
-    plt.title(f'SEIRV Model Simulation - {scenario_name}', fontsize=24)
+    plt.xlabel('Time (days)', fontsize=20)
+    plt.ylabel('Number of People', fontsize=20)
+    plt.title(f'SEIRV Model Simulation - {scenario_name}', fontsize=32)
     
     plt.grid(True, which="both", ls="--", linewidth=0.5)
-    plt.legend(fontsize=18)
+    plt.legend(fontsize=22)
     
-    plt.xticks(fontsize=18)
-    plt.yticks(fontsize=18)
+    plt.xticks(fontsize=22)
+    plt.yticks(fontsize=22)
     
     if save:
         plt.savefig(f'plots/seirv_simulation_{scenario_name}.png', bbox_inches='tight', dpi=300)
