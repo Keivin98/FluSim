@@ -334,8 +334,8 @@ if __name__ == "__main__":
         generate_report(final_counts_mean, final_counts_std, report_data_aggregate, scenario_name)
     
     pair_labels = [
-        ("No Masking", "Masking and Social Distancing"),
-        ("Masking and Social Distancing", "1 Vaccine Dose"),
+        ("No Masking", "Masking & Distancing"),
+        ("Masking & Distancing", "1 Vaccine Dose"),
         ("1 Vaccine Dose", "2 Vaccine Doses"),
     ]
 
