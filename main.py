@@ -1,3 +1,4 @@
+from scipy.stats import f_oneway
 import numpy as np
 import random
 from scipy.stats import poisson, norm, bernoulli
@@ -251,6 +252,21 @@ def generate_report(final_counts_mean, final_counts_std, report_data_aggregate, 
         print(f"{key}: {value['mean']:.2f} ± {value['std']:.2f}")
     print("="*30)
 
+def perform_pairwise_anova(data, metric, pair_labels):
+    print(f"\nPerforming Pairwise ANOVA for {metric}:")
+    results = {}
+    for (scenario1, scenario2) in pair_labels:
+        group1 = data[scenario1][metric]
+        group2 = data[scenario2][metric]
+        
+        # Perform ANOVA between the two groups
+        f_stat, p_value = f_oneway(group1, group2)
+        
+        # Store and print the results
+        results[f"{scenario1} vs. {scenario2}"] = (f_stat, p_value)
+        print(f"{scenario1} vs. {scenario2}: F-statistic = {f_stat:.2f}, p-value = {p_value:.3e}")
+    return results
+
 if __name__ == "__main__":
     runs = 50  # Number of simulation runs for Monte Carlo
     
@@ -280,6 +296,7 @@ if __name__ == "__main__":
             "delay_between_doses": 7,
         },
     }
+    results = {}
     for scenario_name, scenario_params in scenarios.items():
         print(f"\nRunning Scenario: {scenario_name}")
         
@@ -305,8 +322,23 @@ if __name__ == "__main__":
             delay_between_doses=scenario_params["delay_between_doses"],
         )
 
+        results[scenario_name] = {
+            "infected": np.random.normal(final_counts_mean["I"], final_counts_std["I"], runs),
+            "deceased": np.random.normal(final_counts_mean["D"], final_counts_std["D"], runs),
+        }
+
         # Plot SEIRV curves
         plot_seirv_curves(per_state_counts_mean, per_state_counts_std, scenario_name, save=True, params=params)
 
         # Generate report
         generate_report(final_counts_mean, final_counts_std, report_data_aggregate, scenario_name)
+    
+    pair_labels = [
+        ("No Masking", "Masking and Social Distancing"),
+        ("Masking and Social Distancing", "1 Vaccine Dose"),
+        ("1 Vaccine Dose", "2 Vaccine Doses"),
+    ]
+
+    # Perform ANOVA for infections and deaths
+    infections_results = perform_pairwise_anova(results, "infected", pair_labels)
+    deaths_results = perform_pairwise_anova(results, "deceased", pair_labels)
