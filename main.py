@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 DEFAULT_CONSTANTS = {
     "population_size": 10000,
     "initial_infected": 50,
-    "vaccination_rate": 0.0075,
+    "vaccination_rate": 0.02,
     "vaccination_delay": 14,
-    "delay_between_doses": 21,
-    "vaccine_efficacy_per_dose": [0.6, 0.3],
+    "delay_between_doses": 7,
+    "vaccine_efficacy_per_dose": [0.4, 0.4],
     "recovery_mean": 10,
     "recovery_sd": 2,
     "latent_period_mean": 2,
@@ -20,9 +20,9 @@ DEFAULT_CONSTANTS = {
     "mortality_rate": 0.03,
     "contact_rate_lambda": 20,
     "masking_effectiveness": 0.4,
-    "vaccination_start_step": 30,
-    "total_steps": 90,
-    "infection_radius": 0.001,
+    "vaccination_start_step": 20,
+    "total_steps": 200,
+    "infection_radius": 0.01,
     "base_infection_prob": 0.4,
 }
 
