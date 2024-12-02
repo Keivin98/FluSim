@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Constants (can be overridden in functions)
 DEFAULT_CONSTANTS = {
-    "population_size": 2000,
+    "population_size": 10000,
     "initial_infected": 50,
     "vaccination_rate": 0.0075,
     "vaccination_delay": 14,
@@ -20,8 +20,8 @@ DEFAULT_CONSTANTS = {
     "contact_rate_lambda": 20,
     "masking_effectiveness": 0.4,
     "vaccination_start_step": 30,
-    "total_steps": 200,
-    "infection_radius": 0.075,
+    "total_steps": 90,
+    "infection_radius": 0.001,
     "base_infection_prob": 0.4,
 }
 
@@ -48,8 +48,10 @@ class Person:
         self.recovered_step = None
 
     def update_vaccination_status(self, current_step, params):
+        """Update vaccine efficacy and vaccination status based on the step."""
         for idx, dose_time in enumerate(self.vaccination_times):
-            if current_step - dose_time == params["vaccination_delay"] and idx >= self.doses_received:
+            # Check if the dose has taken effect
+            if current_step - dose_time >= params["vaccination_delay"] and idx >= self.doses_received:
                 self.doses_received += 1
                 if idx < len(params["vaccine_efficacy_per_dose"]):
                     dose_efficacy = params["vaccine_efficacy_per_dose"][idx]
@@ -57,15 +59,24 @@ class Person:
                     dose_efficacy = 0.0
                 self.vaccine_efficacy += dose_efficacy
                 self.vaccine_efficacy = min(self.vaccine_efficacy, 1.0)
-                self.vaccinated = True
+
+                # Mark as vaccinated if the first dose is applied
+                if not self.vaccinated:
+                    self.vaccinated = True
 
 def vaccinate_population(step, population, params, doses, delay_between_doses):
+    """Select eligible people for vaccination and schedule doses."""
     num_to_vaccinate = int(params["vaccination_rate"] * params["population_size"])
     eligible_people = []
     for person in population:
-        if person.state == SUSCEPTIBLE and person.doses_received < doses:
-            if not person.vaccination_times or (step - person.vaccination_times[-1]) >= delay_between_doses:
-                eligible_people.append(person)
+        # Only vaccinate susceptible people who haven't exceeded the maximum doses
+        if (
+            person.state == SUSCEPTIBLE 
+            and len(person.vaccination_times) < doses 
+            and (not person.vaccination_times or (step - person.vaccination_times[-1]) >= delay_between_doses)
+        ):
+            eligible_people.append(person)
+
     if eligible_people:
         to_vaccinate = random.sample(eligible_people, min(num_to_vaccinate, len(eligible_people)))
         for person in to_vaccinate:
@@ -113,7 +124,9 @@ def run_simulation(params=DEFAULT_CONSTANTS, vaccination_rate=None, masking_effe
                         vaccine_efficacy_susceptible = other_person.vaccine_efficacy
                         masking_effectiveness = params["masking_effectiveness"]
                         infection_prob = base_prob * (1 - vaccine_efficacy_susceptible) * (1 - masking_effectiveness)
-                        if random.random() < infection_prob:
+                        random_prob = random.random()
+                        if random_prob < infection_prob:
+                            # print(random_prob, infection_prob)
                             other_person.state = EXPOSED
                             other_person.infected_time = 0
                             other_person.was_infected = True
@@ -164,7 +177,7 @@ def run_simulation(params=DEFAULT_CONSTANTS, vaccination_rate=None, masking_effe
         return report_data
 
 def run_monte_carlo_simulation(runs, params=DEFAULT_CONSTANTS, **kwargs):
-    total_steps = params.get("total_steps", 365)
+    total_steps = params.get("total_steps", 90)
     states = [SUSCEPTIBLE, EXPOSED, INFECTIOUS, RECOVERED, DEAD, 'V']
     per_state_counts_runs = {state: np.zeros((runs, total_steps)) for state in states}
     final_counts_runs = {state: np.zeros(runs) for state in states}
@@ -201,90 +214,89 @@ def run_monte_carlo_simulation(runs, params=DEFAULT_CONSTANTS, **kwargs):
     return per_state_counts_mean, per_state_counts_std, final_counts_mean, final_counts_std, report_data_aggregate
 
 def plot_seirv_curves(per_state_counts_mean, per_state_counts_std, scenario_name, save=False, params=DEFAULT_CONSTANTS):
-    total_steps = params.get("total_steps", 365)
+    total_steps = params.get("total_steps", 90)
     states = [SUSCEPTIBLE, EXPOSED, INFECTIOUS, RECOVERED, DEAD, 'V']
     time = np.arange(total_steps)
+    
     plt.figure(figsize=(12, 8))
+    
     for state in states:
         mean = per_state_counts_mean[state]
         std = per_state_counts_std[state]
-        plt.plot(time, mean, label=state)
+        plt.plot(time, mean, label=state, linewidth=2)
         plt.fill_between(time, mean - std, mean + std, alpha=0.2)
-    plt.xlabel('Time (days)')
-    plt.ylabel('Number of People')
-    plt.title(f'SEIRV Model Simulation - {scenario_name}')
-    # plt.yscale('log')  # Apply logarithmic scale
+    
+    plt.xlabel('Time (days)', fontsize=16)
+    plt.ylabel('Number of People', fontsize=16)
+    plt.title(f'SEIRV Model Simulation - {scenario_name}', fontsize=24)
+    
     plt.grid(True, which="both", ls="--", linewidth=0.5)
-    plt.legend()
+    plt.legend(fontsize=18)
+    
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    
     if save:
-        plt.savefig(f'plots/seirv_simulation_{scenario_name}.png')
+        plt.savefig(f'plots/seirv_simulation_{scenario_name}.png', bbox_inches='tight', dpi=300)
     else:
         plt.show()
+    
     plt.close()
 
 def generate_report(final_counts_mean, final_counts_std, report_data_aggregate, scenario_name):
     print(f"\n=== Report for {scenario_name} ===")
-    print("Final Counts (Mean ± Std):")
-    for state in [SUSCEPTIBLE, EXPOSED, INFECTIOUS, RECOVERED, DEAD, 'V']:
-        mean = final_counts_mean[state]
-        std = final_counts_std[state]
-        print(f"{state}: {mean:.2f} ± {std:.2f}")
+
     print("\nAggregate Report Data:")
     for key, value in report_data_aggregate.items():
         print(f"{key}: {value['mean']:.2f} ± {value['std']:.2f}")
     print("="*30)
 
-# Define the four scenarios
-scenarios = {
-    "No Masking": {
-        "masking_effectiveness": 0.0,
-        "vaccination_rate": 0.0,
-        "doses": 0,
-        "delay_between_doses": 0,
-    },
-    "Masking and Social Distancing": {
-        "masking_effectiveness": 0.4,
-        "vaccination_rate": 0.0,
-        "doses": 0,
-        "delay_between_doses": 0,
-    },
-    "1 Vaccine Dose": {
-        "masking_effectiveness": 0.4,
-        "vaccination_rate": 0.0075,  # Increased vaccination rate
-        "doses": 1,
-        "delay_between_doses": 0,
-    },
-    "2 Vaccine Doses": {
-        "masking_effectiveness": 0.4,
-        "vaccination_rate": 0.0075,  # Increased vaccination rate
-        "doses": 2,
-        "delay_between_doses": 14,
-    },
-}
-
-# Example Usage: Run all scenarios
 if __name__ == "__main__":
     runs = 50  # Number of simulation runs for Monte Carlo
-
+    
+    scenarios = {
+        "No Masking": {
+            "masking_effectiveness": 0.0,
+            "vaccination_rate": 0.0,
+            "doses": 0,
+            "delay_between_doses": 0,
+        },
+        "Masking and Social Distancing": {
+            "masking_effectiveness": 0.45,
+            "vaccination_rate": 0.0,
+            "doses": 0,
+            "delay_between_doses": 0,
+        },
+        "1 Vaccine Dose": {
+            "masking_effectiveness": 0.45,
+            "vaccination_rate": 0.02,
+            "doses": 1,
+            "delay_between_doses": 7,
+        },
+        "2 Vaccine Doses": {
+            "masking_effectiveness": 0.45,
+            "vaccination_rate": 0.02,
+            "doses": 2,
+            "delay_between_doses": 7,
+        },
+    }
     for scenario_name, scenario_params in scenarios.items():
         print(f"\nRunning Scenario: {scenario_name}")
         
-        # Prepare parameters for simulation
         params = {
-            "population_size": 2000,
+            "population_size": 10000,
             "total_steps": 200,
-            "vaccination_start_step": 20,
-            "vaccine_efficacy_per_dose": [0.6, 0.3],
-            "vaccination_delay": 14,
+            "vaccination_start_step": 15,
+            "vaccine_efficacy_per_dose": [0.4, 0.4],
+            "vaccination_delay": 0,
             "delay_between_doses": scenario_params["delay_between_doses"],
-            "contact_rate_lambda": 15,
+            "contact_rate_lambda": 20,
             "recovery_mean": 10,
             "masking_effectiveness": scenario_params["masking_effectiveness"],
             "infection_radius": 0.1,
             "base_infection_prob": 0.4,
         }
 
-        # Run Monte Carlo simulation for the current scenario
         per_state_counts_mean, per_state_counts_std, final_counts_mean, final_counts_std, report_data_aggregate = run_monte_carlo_simulation(
             runs=runs,
             params=params,
