@@ -1,6 +1,6 @@
 # FluSim -- SEIRV Monte Carlo Simulation Library
 
-This library provides a framework to simulate the spread of infectious diseases using an enhanced SEIRV (Susceptible, Exposed, Infectious, Recovered, Vaccinated, Dead) model. The simulations are run with Monte Carlo methods to account for stochastic variations, allowing users to evaluate the effects of interventions like masking, social distancing, and vaccination.
+This library provides a framework to simulate the spread of infectious diseases using an enhanced SEIRV (Susceptible, Exposed, Infectious, Recovered, Vaccinated, Dead) model. The simulations are run with Monte Carlo methods to account for stochastic variations, allowing users to evaluate the effects of interventions like masking, social distancing, and vaccination. The implementation of this library was done with the help of ChatGPT \cite{OpenAI. ChatGPT (Dec 2 version). Accessed December 2, 2024. https://openai.com/chatgpt.}
 
 ---
 
@@ -157,3 +157,11 @@ Key Parameters
 | `total_steps`               | Total number of days in the simulation.                                | 200           |
 | `infection_radius`          | Distance within which an infectious individual can spread the disease. | 0.075         |
 | `base_infection_prob`       | Probability of transmission per contact (before adjustments).          | 0.4           |
+
+## Acknowledgments
+
+The following resources and contributions were instrumental in developing this codebase:
+
+- [OpenAI ChatGPT](https://openai.com/chatgpt): Provided assistance with cleaning and modularizing the library.
+- The open-source community for offering valuable resources and inspiration.
+- Researchers and developers whose prior work laid the conceptual foundation for this project.
